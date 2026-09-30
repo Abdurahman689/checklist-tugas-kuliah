@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklist Tugas Kuliah</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f7; --panel:#ffffff; --ink:#15213b; --muted:#66728a; --line:#dbe2ec;
+  --accent:#2f5bea; --accent-soft:#e3eaff; --ok:#1f9d6b; --warn:#c77700; --bad:#d13b4b;
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1524; --panel:#182036; --ink:#e8edf8; --muted:#94a1bd; --line:#2a3452;
+    --accent:#6f93ff; --accent-soft:#22305c; --ok:#3ecb92; --warn:#f0a63a; --bad:#ff6b7a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1524; --panel:#182036; --ink:#e8edf8; --muted:#94a1bd; --line:#2a3452;
+  --accent:#6f93ff; --accent-soft:#22305c; --ok:#3ecb92; --warn:#f0a63a; --bad:#ff6b7a;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:22px}
+h1{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800;margin:0;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.95rem}
+button,input,select{font:inherit;color:inherit}
+.icon-btn{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.progress{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px}
+.progress-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pct{font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.pct-label{color:var(--muted);font-size:.92rem}
+.bar{height:12px;background:var(--accent-soft);border-radius:99px;overflow:hidden;margin:12px 0 14px}
+.bar>div{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{border-left:3px solid var(--line);padding-left:10px}
+.stat b{display:block;font-size:1.25rem}
+.stat span{color:var(--muted);font-size:.8rem}
+.stat.late{border-color:var(--bad)} .stat.late b{color:var(--bad)}
+.stat.soon{border-color:var(--warn)} .stat.soon b{color:var(--warn)}
+.stat.done{border-color:var(--ok)} .stat.done b{color:var(--ok)}
+
+form.add{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr auto;gap:10px;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted);font-weight:500}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0;width:100%}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+:root[data-theme="dark"] .btn,:root:not([data-theme="light"]) .btn{color:#0f1524}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn{color:#fff}}
+:root[data-theme="light"] .btn{color:#fff}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tabs{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
+.tab{border:0;background:none;padding:7px 14px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500}
+.tab[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.toolbar input{flex:1;min-width:150px}
+.toolbar select{width:auto}
+
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+li.task{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c,var(--accent));border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+li.task.done .title{text-decoration:line-through;color:var(--muted)}
+li.task.done{opacity:.72}
+.check{appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;border:2px solid var(--muted);border-radius:8px;background:none;cursor:pointer;display:grid;place-content:center;padding:0}
+.check::after{content:"";width:12px;height:7px;border-left:3px solid #fff;border-bottom:3px solid #fff;transform:rotate(-45deg) scale(0);transition:transform .15s;margin-top:-3px}
+.check:checked{background:var(--ok);border-color:var(--ok)}
+.check:checked::after{transform:rotate(-45deg) scale(1)}
+.body{flex:1;min-width:0}
+.title{font-weight:700;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.82rem;color:var(--muted);margin-top:2px}
+.course{color:var(--c);font-weight:700}
+.due.late{color:var(--bad);font-weight:700} .due.soon{color:var(--warn);font-weight:700}
+.prio{font-size:.75rem;font-weight:700;border-radius:99px;padding:1px 9px;border:1px solid currentColor}
+.prio.tinggi{color:var(--bad)} .prio.sedang{color:var(--warn)} .prio.rendah{color:var(--ok)}
+.del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:6px 8px;border-radius:8px}
+.del:hover{color:var(--bad);background:var(--bg)}
+.empty{text-align:center;color:var(--muted);padding:36px 10px;border:2px dashed var(--line);border-radius:var(--radius)}
+.foot{display:flex;justify-content:space-between;margin-top:14px;color:var(--muted);font-size:.85rem}
+.link{background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}
+
+@media (max-width:720px){
+  form.add{grid-template-columns:1fr 1fr}
+  form.add label:first-child{grid-column:1/-1}
+  form.add .btn{grid-column:1/-1}
+  .stats{grid-template-columns:repeat(2,1fr);gap:12px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Tugas Kuliah</h1>
+      <p class="sub" id="today"></p>
+    </div>
+    <button class="icon-btn" id="theme" type="button" aria-label="Ganti tema">Tema</button>
+  </header>
+
+  <section class="progress" aria-label="Progres tugas">
+    <div class="progress-top">
+      <div><span class="pct" id="pct">0%</span> <span class="pct-label" id="pctLabel">belum ada tugas</span></div>
+    </div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="barWrap"><div id="bar"></div></div>
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b><span>Total tugas</span></div>
+      <div class="stat late"><b id="sLate">0</b><span>Terlambat</span></div>
+      <div class="stat soon"><b id="sSoon">0</b><span>Jatuh tempo ≤ 3 hari</span></div>
+      <div class="stat done"><b id="sDone">0</b><span>Selesai</span></div>
+    </div>
+  </section>
+
+  <form class="add" id="form" autocomplete="off">
+    <label>Nama tugas
+      <input id="fTitle" required maxlength="120" placeholder="Contoh: Laporan praktikum 3">
+    </label>
+    <label>Mata kuliah
+      <input id="fCourse" list="courses" required maxlength="40" placeholder="Basis Data">
+      <datalist id="courses"></datalist>
+    </label>
+    <label>Tenggat
+      <input id="fDue" type="date" required>
+    </label>
+    <label>Prioritas
+      <select id="fPrio">
+        <option value="tinggi">Tinggi</option>
+        <option value="sedang" selected>Sedang</option>
+        <option value="rendah">Rendah</option>
+      </select>
+    </label>
+    <button class="btn" type="submit">Tambah tugas</button>
+  </form>
+
+  <div class="toolbar">
+    <div class="tabs" role="group" aria-label="Filter status">
+      <button class="tab" data-f="semua" aria-pressed="true" type="button">Semua</button>
+      <button class="tab" data-f="aktif" aria-pressed="false" type="button">Belum selesai</button>
+      <button class="tab" data-f="selesai" aria-pressed="false" type="button">Selesai</button>
+    </div>
+    <select id="courseFilter" aria-label="Filter mata kuliah"><option value="">Semua mata kuliah</option></select>
+    <select id="sort" aria-label="Urutkan">
+      <option value="due">Urut tenggat</option>
+      <option value="prio">Urut prioritas</option>
+      <option value="new">Terbaru</option>
+    </select>
+    <input id="search" type="search" placeholder="Cari tugas…" aria-label="Cari tugas">
+  </div>
+
+  <ul id="list"></ul>
+
+  <div class="foot">
+    <span id="count"></span>
+    <button class="link" id="clearDone" type="button">Hapus semua yang selesai</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY = 'tugas-kuliah-v1', THEME = 'tugas-kuliah-theme';
+  var tasks = [], filter = 'semua';
+  var $ = function(id){ return document.getElementById(id); };
+
+  function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ return []; } }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(tasks)); } catch(e){} }
+
+  function startOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
+  function daysLeft(dateStr){
+    var due = startOfDay(dateStr + 'T00:00:00');
+    return Math.round((due - startOfDay(new Date())) / 86400000);
+  }
+  function dueText(t){
+    var n = daysLeft(t.due);
+    if (t.done) return {text:'Tenggat ' + fmt(t.due), cls:''};
+    if (n < 0) return {text:'Terlambat ' + (-n) + ' hari', cls:'late'};
+    if (n === 0) return {text:'Hari ini', cls:'soon'};
+    if (n === 1) return {text:'Besok', cls:'soon'};
+    if (n <= 3) return {text:n + ' hari lagi', cls:'soon'};
+    return {text:fmt(t.due) + ' (' + n + ' hari lagi)', cls:''};
+  }
+  function fmt(s){
+    return new Date(s + 'T00:00:00').toLocaleDateString('id-ID', {weekday:'short', day:'numeric', month:'short'});
+  }
+  function hue(str){
+    var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
+    return h;
+  }
+  var prioRank = {tinggi:0, sedang:1, rendah:2};
+
+  function visible(){
+    var q = $('search').value.trim().toLowerCase(), c = $('courseFilter').value, s = $('sort').value;
+    var arr = tasks.filter(function(t){
+      if (filter === 'aktif' && t.done) return false;
+      if (filter === 'selesai' && !t.done) return false;
+      if (c && t.course !== c) return false;
+      if (q && (t.title + ' ' + t.course).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    arr.sort(function(a, b){
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      if (s === 'prio') return prioRank[a.prio] - prioRank[b.prio] || a.due.localeCompare(b.due);
+      if (s === 'new') return b.id - a.id;
+      return a.due.localeCompare(b.due) || prioRank[a.prio] - prioRank[b.prio];
+    });
+    return arr;
+  }
+
+  function render(){
+    var list = $('list'); list.textContent = '';
+    var arr = visible();
+
+    if (!arr.length){
+      var e = document.createElement('div'); e.className = 'empty';
+      e.textContent = tasks.length
+        ? 'Tidak ada tugas yang cocok dengan filter ini.'
+        : 'Belum ada tugas. Isi formulir di atas untuk menambahkan tugas pertama.';
+      list.appendChild(e);
+    }
+
+    arr.forEach(function(t){
+      var li = document.createElement('li');
+      li.className = 'task' + (t.done ? ' done' : '');
+      li.style.setProperty('--c', 'hsl(' + hue(t.course) + ' 60% 46%)');
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'check'; cb.checked = t.done;
+      cb.setAttribute('aria-label', 'Tandai selesai: ' + t.title);
+      cb.addEventListener('change', function(){ t.done = cb.checked; save(); render(); });
+
+      var body = document.createElement('div'); body.className = 'body';
+      var title = document.createElement('div'); title.className = 'title'; title.textContent = t.title;
+      var meta = document.createElement('div'); meta.className = 'meta';
+      var course = document.createElement('span'); course.className = 'course'; course.textContent = t.course;
+      var d = dueText(t);
+      var due = document.createElement('span'); due.className = 'due ' + d.cls; due.textContent = d.text;
+      var prio = document.createElement('span'); prio.className = 'prio ' + t.prio; prio.textContent = t.prio.charAt(0).toUpperCase() + t.prio.slice(1);
+      meta.appendChild(course); meta.appendChild(due); meta.appendChild(prio);
+      body.appendChild(title); body.appendChild(meta);
+
+      var del = document.createElement('button');
+      del.className = 'del'; del.type = 'button'; del.textContent = '✕';
+      del.setAttribute('aria-label', 'Hapus tugas: ' + t.title);
+      del.addEventListener('click', function(){
+        tasks = tasks.filter(function(x){ return x.id !== t.id; });
+        save(); render();
+      });
+
+      li.appendChild(cb); li.appendChild(body); li.appendChild(del);
+      list.appendChild(li);
+    });
+
+    stats(arr.length);
+    courses();
+  }
+
+  function stats(shown){
+    var total = tasks.length, done = tasks.filter(function(t){ return t.done; }).length;
+    var active = tasks.filter(function(t){ return !t.done; });
+    var late = active.filter(function(t){ return daysLeft(t.due) < 0; }).length;
+    var soon = active.filter(function(t){ var n = daysLeft(t.due); return n >= 0 && n <= 3; }).length;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    $('pct').textContent = pct + '%';
+    $('pctLabel').textContent = total ? (done + ' dari ' + total + ' tugas selesai') : 'belum ada tugas';
+    $('bar').style.width = pct + '%';
+    $('barWrap').setAttribute('aria-valuenow', pct);
+    $('sTotal').textContent = total; $('sLate').textContent = late;
+    $('sSoon').textContent = soon; $('sDone').textContent = done;
+    $('count').textContent = 'Menampilkan ' + shown + ' dari ' + total + ' tugas';
+  }
+
+  function courses(){
+    var names = Array.from(new Set(tasks.map(function(t){ return t.course; }))).sort();
+    var dl = $('courses'); dl.textContent = '';
+    names.forEach(function(n){ var o = document.createElement('option'); o.value = n; dl.appendChild(o); });
+    var sel = $('courseFilter'), cur = sel.value;
+    sel.textContent = '';
+    var all = document.createElement('option'); all.value = ''; all.textContent = 'Semua mata kuliah'; sel.appendChild(all);
+    names.forEach(function(n){ var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+    sel.value = names.indexOf(cur) >= 0 ? cur : '';
+  }
+
+  $('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var title = $('fTitle').value.trim(), course = $('fCourse').value.trim();
+    if (!title || !course || !$('fDue').value) return;
+    tasks.push({id: Date.now(), title: title, course: course, due: $('fDue').value, prio: $('fPrio').value, done: false});
+    save();
+    $('fTitle').value = ''; $('fTitle').focus();
+    render();
+  });
+
+  document.querySelectorAll('.tab').forEach(function(b){
+    b.addEventListener('click', function(){
+      filter = b.dataset.f;
+      document.querySelectorAll('.tab').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      render();
+    });
+  });
+  ['search','courseFilter','sort'].forEach(function(id){ $(id).addEventListener('input', render); });
+
+  $('clearDone').addEventListener('click', function(){
+    var n = tasks.filter(function(t){ return t.done; }).length;
+    if (!n) return;
+    if (confirm('Hapus ' + n + ' tugas yang sudah selesai?')){
+      tasks = tasks.filter(function(t){ return !t.done; }); save(); render();
+    }
+  });
+
+  $('theme').addEventListener('click', function(){
+    var root = document.documentElement;
+    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem(THEME, root.dataset.theme); } catch(e){}
+  });
+  try { var th = localStorage.getItem(THEME); if (th) document.documentElement.dataset.theme = th; } catch(e){}
+
+  // Default tenggat: 7 hari dari sekarang
+  var d = new Date(); d.setDate(d.getDate() + 7);
+  $('fDue').value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  $('today').textContent = new Date().toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  tasks = load();
+  render();
+})();
+</script>
+</body>
+</html>
